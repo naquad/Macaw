@@ -3,19 +3,33 @@
 class Macaw
 {
 
-    public static $routes = array();
+        public static $routes = array();
 
-    public static $methods = array();
+        public static $methods = array();
 
-    public static $callbacks = array();
+        public static $callbacks = array();
 
-    public static $patterns = array(
-        ':any' => '[^/]+',
-        ':num' => '[0-9]+',
-        ':all' => '.*'
-    );
+        public static $patterns = array(
+            ':any' => '[^/]+',
+            ':num' => '[0-9]+',
+            ':all' => '.*'
+        );
 
-    public static $error_callback;
+        public static $error_callback;
+
+        public static $verbs_with_body = array(
+            'OPTIONS',
+            'PUT',
+            'PATCH'
+        );
+
+        public static $content_type_json = '~
+            ^(?:
+            application/(?:json|x-javascript)
+            |
+            text/(?:javascript|x-javascript|x-json)
+        )
+        ~x';
 
     /**
      * Defines a route w/ callback and method
@@ -32,10 +46,32 @@ class Macaw
 
     /**
      * Defines callback if route is not found
-    */
+     */
     public static function error($callback)
     {
         self::$error_callback = $callback;
+    }
+
+    /**
+     * Parses JSON request bodies, populates $_POST
+     * for queries like PUT, PATCH, etc...
+     */
+    public static function preprocessInput()
+    {
+        if ($_SERVER['HTTP_CONTENT_LENGTH'] == 0) // empty request
+            return;
+
+        $is_json = preg_match(self::$content_type_json, $_SERVER['HTTP_CONTENT_TYPE']);
+        if (in_array($_SERVER['REQUEST_METHOD'], self::$verbs_with_body) || $is_json) {
+            $request = file_get_contents('php://input');
+
+            if ($is_json) {
+                $result = json_decode($request, true);
+                $_POST = $result === false ? array() : $result;
+            } else {
+                parse_str($request, $_POST);
+            }
+        }
     }
 
     /**
@@ -43,20 +79,22 @@ class Macaw
      */
     public static function dispatch($uri = null, $method = null)
     {
-        if($uri === null){
-          if(isset($_GET['p']))
-            $uri = $_GET['p'];
-          else if(!empty($_SERVER['PATH_INFO']))
-            $uri = $_SERVER['PATH_INFO'];
-          else
-            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        self::preprocessInput();
+
+        if($uri === null) {
+            if (isset($_GET['p']))
+                $uri = $_GET['p'];
+            else if (!empty($_SERVER['PATH_INFO']))
+                $uri = $_SERVER['PATH_INFO'];
+            else
+                $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         }
 
-        if($method === null){
-          if(!empty($_REQUEST['_method']))
-            $method = $_REQUEST['_method'];
-          else
-            $method = $_SERVER['REQUEST_METHOD'];
+        if ($method === null) {
+            if (!empty($_REQUEST['_method']))
+                $method = $_REQUEST['_method'];
+            else
+                $method = $_SERVER['REQUEST_METHOD'];
         }
 
         $searches = array_keys(static::$patterns);
@@ -88,7 +126,7 @@ class Macaw
                         call_user_func_array(self::$callbacks[$pos], $matched);
                     }
                 }
-            $pos++;
+                $pos++;
             }
         }
 
