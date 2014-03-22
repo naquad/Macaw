@@ -58,7 +58,7 @@ class Macaw
      */
     public static function preprocessInput()
     {
-        if ($_SERVER['HTTP_CONTENT_LENGTH'] == 0) // empty request
+        if (!isset($_SERVER['HTTP_CONTENT_LENGTH']) || $_SERVER['HTTP_CONTENT_LENGTH'] == 0) // empty request
             return;
 
         $is_json = preg_match(self::$content_type_json, $_SERVER['HTTP_CONTENT_TYPE']);
