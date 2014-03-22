@@ -41,10 +41,23 @@ class Macaw
     /**
      * Runs the callback for the given request
      */
-    public static function dispatch()
+    public static function dispatch($uri = null, $method = null)
     {
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $method = $_SERVER['REQUEST_METHOD'];
+        if($uri === null){
+          if(isset($_GET['p']))
+            $uri = $_GET['p'];
+          else if(!empty($_SERVER['PATH_INFO']))
+            $uri = $_SERVER['PATH_INFO'];
+          else
+            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        }
+
+        if($method === null){
+          if(!empty($_REQUEST['_method']))
+            $method = $_REQUEST['_method'];
+          else
+            $method = $_SERVER['REQUEST_METHOD'];
+        }
 
         $searches = array_keys(static::$patterns);
         $replaces = array_values(static::$patterns);

@@ -1,6 +1,6 @@
 {
-	"name": "codingbean/macaw",
-	"description": "Sexy PHP router.",
+	"name": "naquad/macaw",
+	"description": "Sexy PHP router. Fork with better URL and method detection.",
 	"license": "MIT",
 	"require": {
 		"php": ">=5.3.3"
