@@ -24,7 +24,7 @@ class Macaw
     );
 
     public static $content_type_json = '~
-        ^(?:
+    ^(?:
         application/(?:json|x-javascript)
         |
         text/(?:javascript|x-javascript|x-json)
