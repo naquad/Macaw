@@ -3,33 +3,33 @@
 class Macaw
 {
 
-        public static $routes = array();
+    public static $routes = array();
 
-        public static $methods = array();
+    public static $methods = array();
 
-        public static $callbacks = array();
+    public static $callbacks = array();
 
-        public static $patterns = array(
-            ':any' => '[^/]+',
-            ':num' => '[0-9]+',
-            ':all' => '.*'
-        );
+    public static $patterns = array(
+        ':any' => '[^/]+',
+        ':num' => '[0-9]+',
+        ':all' => '.*'
+    );
 
-        public static $error_callback;
+    public static $error_callback;
 
-        public static $verbs_with_body = array(
-            'OPTIONS',
-            'PUT',
-            'PATCH'
-        );
+    public static $verbs_with_body = array(
+        'OPTIONS',
+        'PUT',
+        'PATCH'
+    );
 
-        public static $content_type_json = '~
-            ^(?:
-            application/(?:json|x-javascript)
-            |
-            text/(?:javascript|x-javascript|x-json)
-        )
-        ~x';
+    public static $content_type_json = '~
+        ^(?:
+        application/(?:json|x-javascript)
+        |
+        text/(?:javascript|x-javascript|x-json)
+    )
+    ~x';
 
     /**
      * Defines a route w/ callback and method
